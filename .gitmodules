@@ -1,0 +1,4 @@
+[submodule "examples/mutransformers"]
+	path = examples/mutransformers
+	url = https://github.com/microsoft/mutransformers
+	branch = main
