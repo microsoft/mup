@@ -14,6 +14,23 @@ More generally, μP reduces the fragility and uncertainty when transitioning fro
 
 This repo contains the source code for the `mup` package, our tool that makes the implementation of μP in Pytorch models effortless and less error-prone.
 
+## Table of Contents
+
+
+  - [Installation](#installation)
+    - [Install From Source](#install-from-source)
+  - [Basic Usage](#basic-usage)
+  - [How `mup` Works Under the Hood](#how-mup-works-under-the-hood)
+  - [Current Limitations](#current-limitations)
+  - [Checking Correctness of Parametrization](#checking-correctness-of-parametrization)
+    - [Coord Check](#coord-check)
+    - [Making Your Own Coord Check Plots](#making-your-own-coord-check-plots)
+    - [Wider is Always Better](#wider-is-always-better)
+  - [Examples](#examples)
+  - [Running Tests](#running-tests)
+  - [The Basic Math](#the-basic-math)
+  - [Contributing](#contributing)
+  - [Trademarks](#trademarks)
 
 ## Installation
 
