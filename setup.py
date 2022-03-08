@@ -12,6 +12,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/microsoft/mup",
+    download_url="https://github.com/microsoft/mup/archive/refs/tags/v1.0.0.tar.gz",
     install_requires=[
         'numpy',
         'pandas',
