@@ -1,5 +1,9 @@
 # Maximal Update Parametrization (μP) and Hyperparameter Transfer (μTransfer) 
 
+[Paper link](https://arxiv.org/abs/2203.03466)
+|
+[Blog link](https://www.microsoft.com/en-us/research/blog/%C2%B5transfer-a-technique-for-hyperparameter-tuning-of-enormous-neural-networks/)
+
 In [*Tensor Programs V: Tuning Large Neural Networks via Zero-Shot Hyperparameter Transfer*](https://arxiv.org/abs/2203.03466), we show that hyperparameters become stable across neural network sizes when we parametrize the model in [maximal update parametrization (μP)](http://arxiv.org/abs/2011.14522).
 This can be used to tune extremely large neural networks such as large pretrained transformers, as we have done in our work.
 More generally, μP reduces the fragility and uncertainty when transitioning from exploration to scaling up, which are not often talked about explicitly in the deep learning literature.
@@ -245,7 +249,7 @@ Then, if A and v both have entry size Θ(1) and they are correlated in ways that
 
 Given this table, one can then trace the forward and backward computation of a network to derive μP straightforwardly.
 
-See [our blog post](https://www.microsoft.com/en-us/research/?p=823648) for a gentle primer and [our paper](https://arxiv.org/abs/2203.03466) for details.
+See [our blog post](https://www.microsoft.com/en-us/research/blog/%C2%B5transfer-a-technique-for-hyperparameter-tuning-of-enormous-neural-networks/) for a gentle primer and [our paper](https://arxiv.org/abs/2203.03466) for details.
 
 
 ## Contributing
