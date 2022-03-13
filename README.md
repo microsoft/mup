@@ -4,7 +4,7 @@
 |
 [Blog link](https://www.microsoft.com/en-us/research/blog/%C2%B5transfer-a-technique-for-hyperparameter-tuning-of-enormous-neural-networks/)
 
-In [*Tensor Programs V: Tuning Large Neural Networks via Zero-Shot Hyperparameter Transfer*](https://arxiv.org/abs/2203.03466), we show that hyperparameters become stable across neural network sizes when we parametrize the model in [maximal update parametrization (μP)](http://arxiv.org/abs/2011.14522).
+In [*Tensor Programs V: Tuning Large Neural Networks via Zero-Shot Hyperparameter Transfer*](https://arxiv.org/abs/2203.03466), we show that optimal hyperparameters become stable across neural network sizes when we parametrize the model in [maximal update parametrization (μP)](http://arxiv.org/abs/2011.14522).
 This can be used to tune extremely large neural networks such as large pretrained transformers, as we have done in our work.
 More generally, μP reduces the fragility and uncertainty when transitioning from exploration to scaling up, which are not often talked about explicitly in the deep learning literature.
 
@@ -119,7 +119,6 @@ optimizer = MuSGD(model.parameters(), lr=0.1)
 
 Note the base and delta models *do not need to be trained* --- we are only extracting parameter shape information from them.
 Ideally, we can do so without instantiating the model parameters at all, like in JAX, but unfortunately we currently can't do that in pytorch.
-<!-- - `set_base_shapes(model, ...)` assumes that `model`'s `nn.Linear` layers have been initialized by PyTorch in the default way and rescales its parameters to be consistent with μP. Any custom initialization should come after this and have `torch.init` functions swapped out for `mup.init` functions, as demonstrated above. -->
 
 ## How `mup` Works Under the Hood
 
