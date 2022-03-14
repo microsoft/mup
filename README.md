@@ -118,7 +118,7 @@ optimizer = MuSGD(model.parameters(), lr=0.1)
 ```
 
 Note the base and delta models *do not need to be trained* --- we are only extracting parameter shape information from them.
-Ideally, we can do so without instantiating the model parameters at all, like in JAX, but unfortunately we currently can't do that in pytorch.
+Ideally, we can do so without instantiating the model parameters at all, like in [JAX](https://github.com/google/jax), but unfortunately we currently can't do that in PyTorch --- but upvote [this PyTorch issue](https://github.com/pytorch/pytorch/issues/74143) if you want to see this feature happening!
 
 ## How `mup` Works Under the Hood
 
