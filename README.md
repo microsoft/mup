@@ -137,7 +137,15 @@ For example, the Adam learning rate of hidden weights `p` is calculated as  `glo
 
 - `set_base_shapes(model, ...)` assumes that `model` has just been randomly initialized in the standard way and rescales its parameters using the base shape information so the model is in μP.
 - If you want data parallelism, please use `torch.nn.parallel.DistributedDataParallel` instead of `torch.nn.DataParallel`. This is because the latter removes the attributes the `mup` package adds to each parameter tensor of the model. Also, for performance, `pytorch` [recommends the former anyway](https://pytorch.org/docs/stable/notes/cuda.html#cuda-nn-ddp-instead).
-- We scale the learning rate according to μP explicitly creating refined parameter groups from what is passed to the `mup` optimizer and by manipulating the `lr` attribute in those groups. This means, if your code modifies the `lr` in the optimizer `param_groups` dynamically after the creation of the optimizer, then `mup` might not work as expected.
+- We scale the learning rate according to μP explicitly by creating refined parameter groups from what is passed to the `mup` optimizer and by manipulating the `lr` attribute in those groups. This is compatible with PyTorch's learning rate schedulers. However, if you roll your own, make sure the scheduler sets the learning rate relative to what is currently in the refined parameter groups. The following is an example of what *not* to do and what is OK:
+```python
+optimizer = mup.MuAdam(model.parameters(), lr=1e-3)
+for pg in optimizer.param_groups:
+  # what NOT to do: setting learning rate absolutely
+  # pg['lr'] = 1e-3 * 2
+  # what is an OK alternative: setting it relatively
+  pg['lr'] *= 2
+```
 - By default, any parameter matrix that has 2 "infinite" dimensions (i.e. dimensions that are different from base dimensions) are considered by `mup` to have shape (fan_out, fan_in), i.e., in the forward pass, this matrix multiplies its input on the right. This is the case with all `nn.Linear` weights from pytorch. If you have a custom parameter, say `W`, that violates this convention, you can manually set `W.infshape.main_idx = 0; W.infshape.main = W.infshape[0]` to let `mup` know that its shape corresponds to (fan_in, fan_out). A similar discussion applies if you have a parameter *tensor* with many dimensions but exactly 2 "infinite" dimensions, for which the first is fan_in and the second is fan_out.
 - Currently, [`torch.save` does not save the `infshape` objects attached to each parameter tensor](https://github.com/pytorch/pytorch/issues/72129). Before this is fixed, you would have to set base shape manually after loading a model checkpoint like so:
 ```python
