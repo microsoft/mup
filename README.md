@@ -219,6 +219,11 @@ Nevertheless, to remove the discrepancy at init, we recommend
    the `readout_zero_init=True` option and
    - initializing the query matrix in a Transformer to 0
      (this has to be done manually). If symmetry-breaking is desired in the attention logits at init, initialize the (relative) position biases with nonzero variance.
+     
+#### Tips for Coord Check
+
+- Use a large learning rate (larger than you'd use for actual training). This would emphasize any potential exploding coordinates issue, which could be hidden by the initialization if the learning rate is too small.
+- If you reuse a module multiple times in the forward pass, then `mup.get_coord_data` will only record the statistics from the last usage. In this case, for testing purposes, one can wrap different usages with `nn.Identity` modules of different names to distinguish them.
 
 ### Wider is Always Better
 
