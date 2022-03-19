@@ -27,6 +27,13 @@ class SetBaseShapeCase(unittest.TestCase):
         target_model = _generate_MLP(128, True, True, True)
         set_base_shapes(target_model, base_model, delta=delta_model, savefile=self.mlp_base_shapes_file)
         return get_infshapes(target_model)
+    
+    def get_mlp_infshapes1meta(self):
+        base_model = _generate_MLP(64, True, True, True, device='meta')
+        delta_model = _generate_MLP(65, True, True, True, device='meta')
+        target_model = _generate_MLP(128, True, True, True)
+        set_base_shapes(target_model, base_model, delta=delta_model, savefile=self.mlp_base_shapes_file)
+        return get_infshapes(target_model)
 
     def get_mlp_infshapes2(self):
         target_model = _generate_MLP(128, True, True, True)
@@ -40,6 +47,14 @@ class SetBaseShapeCase(unittest.TestCase):
         target_model = _generate_MLP(128, True, True, True)
         set_base_shapes(target_model, base_infshapes)
         return get_infshapes(target_model)
+    
+    def get_mlp_infshapes3meta(self):
+        base_model = _generate_MLP(64, True, True, True, device='meta')
+        delta_model = _generate_MLP(65, True, True, True, device='meta')
+        base_infshapes = make_base_shapes(base_model, delta_model)
+        target_model = _generate_MLP(128, True, True, True)
+        set_base_shapes(target_model, base_infshapes)
+        return get_infshapes(target_model)
 
     def get_mlp_infshapes4(self):
         base_model = _generate_MLP(64, True, True, True)
@@ -48,8 +63,22 @@ class SetBaseShapeCase(unittest.TestCase):
         set_base_shapes(target_model, get_shapes(base_model), delta=get_shapes(delta_model))
         return get_infshapes(target_model)
         
+    def get_mlp_infshapes4meta(self):
+        base_model = _generate_MLP(64, True, True, True)
+        delta_model = _generate_MLP(65, True, True, True, device='meta')
+        target_model = _generate_MLP(128, True, True, True, device='meta')
+        set_base_shapes(target_model, get_shapes(base_model), delta=get_shapes(delta_model))
+        return get_infshapes(target_model)
+
     def get_mlp_infshapes5(self):
         delta_model = _generate_MLP(65, True, True, True)
+        target_model = _generate_MLP(128, True, True, True)
+        # `delta` here doesn't do anything because of base shape file
+        set_base_shapes(target_model, self.mlp_base_shapes_file, delta=get_shapes(delta_model))
+        return get_infshapes(target_model)
+
+    def get_mlp_infshapes5meta(self):
+        delta_model = _generate_MLP(65, True, True, True, device='meta')
         target_model = _generate_MLP(128, True, True, True)
         # `delta` here doesn't do anything because of base shape file
         set_base_shapes(target_model, self.mlp_base_shapes_file, delta=get_shapes(delta_model))
@@ -62,10 +91,14 @@ class SetBaseShapeCase(unittest.TestCase):
         return get_infshapes(target_model)
 
     def test_set_base_shape(self):
+        self.assertEqual(self.get_mlp_infshapes1(), self.get_mlp_infshapes1meta())
         self.assertEqual(self.get_mlp_infshapes1(), self.get_mlp_infshapes2())
         self.assertEqual(self.get_mlp_infshapes3(), self.get_mlp_infshapes2())
         self.assertEqual(self.get_mlp_infshapes3(), self.get_mlp_infshapes4())
+        self.assertEqual(self.get_mlp_infshapes3(), self.get_mlp_infshapes3meta())
+        self.assertEqual(self.get_mlp_infshapes4(), self.get_mlp_infshapes4meta())
         self.assertEqual(self.get_mlp_infshapes5(), self.get_mlp_infshapes4())
+        self.assertEqual(self.get_mlp_infshapes5(), self.get_mlp_infshapes5meta())
         self.assertNotEqual(self.get_mlp_infshapes5(), self.get_mlp_infshapes_bad())
 
 
