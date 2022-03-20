@@ -76,7 +76,7 @@ class MyModel(nn.Module):
 
 ### Instantiate a base model
 base_model = MyModel(width=1)
-### Optionally, use `device='meta'` to avoid instantiating the model
+### Optionally, use `device='meta'` to avoid instantiating the parameters
 ### This requires you to pass the device flag down to all sub-modules
 # base_model = MyModel(width=1, device='meta')
 ### Instantiate a "delta" model that differs from the base model
@@ -128,6 +128,7 @@ optimizer = MuSGD(model.parameters(), lr=0.1)
 Note the base and delta models *do not need to be trained* --- we are only extracting parameter shape information from them.
 Therefore, optionally, we can avoid instantiating these potentially large models by passing `device='meta'` to their constructor.
 However, you need to make sure that the `device` flag is appropriately passed down to the constructor of all submodules.
+Of course, it'd be even better if PyTorch can do this automatically for any existing `nn.Module`. If you want to see this happen, please upvote [this PyTorch issue](https://github.com/pytorch/pytorch/issues/74143).
 
 ## How `mup` Works Under the Hood
 
