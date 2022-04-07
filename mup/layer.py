@@ -1,9 +1,8 @@
 # Copyright 2022 Microsoft Corporation.
-from torch.nn import Linear
+from torch.nn import Module, Linear, Conv2d
 
-
-class MuReadout(Linear):
-    '''Drop-in replacement for all output linear layers.
+class MuOutput(Module):
+    '''Prototype for all output linear layers.
 
     An "output" linear layer is one that maps from a width dimension (e.g.,
     `d_model` in a Transformer) to a non-width dimension (e.g., vocab size).
@@ -55,6 +54,17 @@ class MuReadout(Linear):
         return super().forward(
             self.output_mult * x / self.width_mult())
 
+class MuReadout(MuOutput, Linear):
+    '''Drop-in replacement for all output linear layers.
+    '''
+    def __init__(self, *args, readout_zero_init=False, output_mult=1.0, **kwargs):
+        super().__init__(*args, readout_zero_init=readout_zero_init, output_mult=output_mult, **kwargs)
+
+class MuConv2d(MuOutput, Conv2d):
+    '''Drop-in replacement for all output conv2d layers.
+    '''
+    def __init__(self, *args, readout_zero_init=False, output_mult=1.0, **kwargs):
+        super().__init__(self, *args, readout_zero_init=readout_zero_init, output_mult=output_mult, **kwargs)
 
 class MuSharedReadout(MuReadout):
     '''`MuReadout` with weights shared with an `nn.Embedding` layer.
