@@ -11,6 +11,7 @@ import pandas as pd
 import torch
 import torch.nn.functional as F
 
+import deepspeed
 
 def cov(x):
     '''Treat `x` as a collection of vectors and its Gram matrix.
@@ -280,6 +281,21 @@ def _get_coord_data(models, dataloader, optcls, nsteps=3,
             if cuda:
                 model = model.cuda()
             optimizer = optcls(model)
+            model, optimizer, _, _ = deepspeed.initialize(config_params={"train_batch_size": 8,
+                                                                        "gradient_accumulation_steps": 1,
+                                                                        "steps_per_print": 9999,
+                                                                        "optimizer": {
+                                                                            "type": "Adam",
+                                                                            "params": {
+                                                                            "lr": 0.00015
+                                                                            }
+                                                                        },
+                                                                        "fp16": {
+                                                                            "enabled": False
+                                                                        },
+                                                                        "zero_optimization": True},
+                                                     model=model,
+                                                     optimizer=optimizer)
             for batch_idx, batch in enumerate(dataloader, 1):
                 remove_hooks = []
                 # add hooks
@@ -315,9 +331,8 @@ def _get_coord_data(models, dataloader, optcls, nsteps=3,
                         loss = F.nll_loss(output, target)
                     else:
                         raise NotImplementedError()
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
+                model.backward(loss)
+                model.step()
                 
                 # remove hooks
                 for handle in remove_hooks:
