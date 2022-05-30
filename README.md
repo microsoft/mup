@@ -96,7 +96,7 @@ model = MyModel(width=100)
 ###   `model` behaves exactly the same as `base_model`
 ###   (which is in PyTorch's default parametrization).
 ###   This provides backward compatibility at this particular model size.
-###   Otherwise, `model`'s init and LR is scaled by μP.
+###   Otherwise, `model`'s init and LR are scaled by μP.
 ### IMPORTANT: this should be called as soon as possible,
 ###   before re-initialization and optimizer definition.
 set_base_shapes(model, base_model, delta=delta_model)
