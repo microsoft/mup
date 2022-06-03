@@ -284,14 +284,9 @@ def _get_coord_data(models, dataloader, optcls, nsteps=3,
             model, optimizer, _, _ = deepspeed.initialize(config_params={"train_batch_size": 8,
                                                                         "gradient_accumulation_steps": 1,
                                                                         "steps_per_print": 9999,
-                                                                        "optimizer": {
-                                                                            "type": "Adam",
-                                                                            "params": {
-                                                                            "lr": 0.00015
-                                                                            }
-                                                                        },
                                                                         "fp16": {
-                                                                            "enabled": False
+                                                                            "enabled": True,
+                                                                            "loss_scale": 8
                                                                         },
                                                                         "zero_optimization": True},
                                                      model=model,
