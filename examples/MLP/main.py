@@ -228,6 +228,8 @@ if __name__ == '__main__':
                     print(f'saving base shapes at {args.save_base_shapes}')
                     if args.deferred_init:
                         from torchdistx.deferred_init import deferred_init
+                        # We don't need to instantiate the base and delta models
+                        # Note: this only works with torch nightly since unsqueeze isn't supported for fake tensors in stable
                         base_shapes = get_shapes(deferred_init(MLP, width=width, nonlin=nonlin, output_mult=args.output_mult, input_mult=args.input_mult))
                         delta_shapes = get_shapes(
                             # just need to change whatever dimension(s) we are scaling
