@@ -7,7 +7,7 @@ from torch.nn import Linear
 from torch.nn.modules.conv import _ConvNd
 
 from mup.infshape import InfShape, zip_infshape
-from mup.layer import MuReadout, rescale_linear_bias
+from mup.layer import MuOutput, rescale_linear_bias
 
 __BSH_COMMENT__ = '''\
 # This is a base shape file encoded in yaml
@@ -185,7 +185,7 @@ def set_base_shapes(model, base, rescale_params=True, delta=None, savefile=None,
         assert_hidden_size_inf(model)
     if rescale_params:
         for name, module in model.named_modules():
-            if isinstance(module, MuReadout):
+            if isinstance(module, MuOutput):
                 module._rescale_parameters()
             elif isinstance(module, (Linear, _ConvNd)):
                 rescale_linear_bias(module)
@@ -194,13 +194,13 @@ def set_base_shapes(model, base, rescale_params=True, delta=None, savefile=None,
 def assert_hidden_size_inf(model):
     '''
     This tests for any `nn.Linear` whose output dimension is finite but input
-    dimension is infinite and is not of type `MuReadout`. Such `nn.Linear`
+    dimension is infinite and is not of type `MuOutput`. Such `nn.Linear`
     modules should not exist in a correctly parametrized models.
     '''
     for name, module in model.named_modules():
-        if isinstance(module, Linear) and not isinstance(module, MuReadout):
+        if isinstance(module, Linear) and not isinstance(module, MuOutput):
             if not module.weight.infshape[0].isinf() and module.weight.infshape[1].isinf():
                 assert False, (
-                    f'{name} has infinite fan-in and finite fan-out dimensions but is not type `MuReadout`. '
-                    'To resolve this, either change the module to `MuReadout` or change the fan-out to an infinite dimension.'
+                    f'{name} has infinite fan-in and finite fan-out dimensions but is not type `MuOutput`. '
+                    'To resolve this, either change the module to `MuOutput` or change the fan-out to an infinite dimension.'
                 )

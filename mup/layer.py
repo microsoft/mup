@@ -1,5 +1,5 @@
 # Copyright 2022 Microsoft Corporation.
-from torch.nn import Module, Linear, Conv2d
+from torch.nn import Module, Linear, Conv1d, Conv2d, Conv3d, ConvTranspose1d, ConvTranspose2d, ConvTranspose3d
 
 class MuOutput(Module):
     '''Prototype for all output linear layers.
@@ -55,16 +55,10 @@ class MuOutput(Module):
             self.output_mult * x / self.width_mult())
 
 class MuReadout(MuOutput, Linear):
-    '''Drop-in replacement for all output linear layers.
+    '''Drop-in replacement for all output Linear layers.
     '''
     def __init__(self, *args, readout_zero_init=False, output_mult=1.0, **kwargs):
         super().__init__(*args, readout_zero_init=readout_zero_init, output_mult=output_mult, **kwargs)
-
-class MuConv2d(MuOutput, Conv2d):
-    '''Drop-in replacement for all output conv2d layers.
-    '''
-    def __init__(self, *args, readout_zero_init=False, output_mult=1.0, **kwargs):
-        super().__init__(self, *args, readout_zero_init=readout_zero_init, output_mult=output_mult, **kwargs)
 
 class MuSharedReadout(MuReadout):
     '''`MuReadout` with weights shared with an `nn.Embedding` layer.
@@ -77,8 +71,45 @@ class MuSharedReadout(MuReadout):
         super().__init__(*weight.shape, bias=bias, **kwargs)
         self.weight = weight
 
+class MuOutConv1d(MuOutput, Conv1d):
+    '''Drop-in replacement for all output Conv1d layers.
+    '''
+    def __init__(self, *args, readout_zero_init=False, output_mult=1.0, **kwargs):
+        super().__init__(*args, readout_zero_init=readout_zero_init, output_mult=output_mult, **kwargs)
+
+class MuOutConv2d(MuOutput, Conv2d):
+    '''Drop-in replacement for all output Conv2d layers.
+    '''
+    def __init__(self, *args, readout_zero_init=False, output_mult=1.0, **kwargs):
+        super().__init__(*args, readout_zero_init=readout_zero_init, output_mult=output_mult, **kwargs)
+
+class MuOutConv3d(MuOutput, Conv3d):
+    '''Drop-in replacement for all output Conv3d layers.
+    '''
+    def __init__(self, *args, readout_zero_init=False, output_mult=1.0, **kwargs):
+        super().__init__(*args, readout_zero_init=readout_zero_init, output_mult=output_mult, **kwargs)
+        
+class MuOutConvTranspose1d(MuOutput, ConvTranspose1d):
+    '''Drop-in replacement for all output ConvTranspose1d layers.
+    '''
+    def __init__(self, *args, readout_zero_init=False, output_mult=1.0, **kwargs):
+        super().__init__(*args, readout_zero_init=readout_zero_init, output_mult=output_mult, **kwargs)
+
+class MuOutConvTranspose2d(MuOutput, ConvTranspose2d):
+    '''Drop-in replacement for all output ConvTranspose2d layers.
+    '''
+    def __init__(self, *args, readout_zero_init=False, output_mult=1.0, **kwargs):
+        super().__init__(*args, readout_zero_init=readout_zero_init, output_mult=output_mult, **kwargs)
+
+class MuOutConvTranspose3d(MuOutput, ConvTranspose3d):
+    '''Drop-in replacement for all output ConvTranspose3d layers.
+    '''
+    def __init__(self, *args, readout_zero_init=False, output_mult=1.0, **kwargs):
+        super().__init__(*args, readout_zero_init=readout_zero_init, output_mult=output_mult, **kwargs)
+
+
 def rescale_linear_bias(linear):
-    '''Rescale bias in nn.Linear layers to convert SP initialization to μP initialization.
+    '''Rescale bias in nn.Linear or nn._ConvNd layers to convert SP initialization to μP initialization.
 
     Warning: This method is NOT idempotent and should be called only once
     unless you know what you are doing.
