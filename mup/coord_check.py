@@ -206,7 +206,7 @@ def _get_coord_data(models, dataloader, optcls, nsteps=3,
                 output_name='loss', lossfn='xent', filter_module_by_name=None,
                 fix_data=True, cuda=True, nseeds=1, 
                 output_fdict=None, input_fdict=None, param_fdict=None,
-                show_progress=True):
+                show_progress=True, one_hot_target=False):
     '''Inner method for `get_coord_data`.
 
     Train the models in `models` with optimizer given by `optcls` and data from
@@ -243,8 +243,11 @@ def _get_coord_data(models, dataloader, optcls, nsteps=3,
             is a dict. If the output is not a dict, then we assume the first
             element of the output is the loss.
         lossfn:
-            loss function to use if not `dict_in_out`. Default is `xent` for
-            cross entropy loss. Other choices are ['mse', 'nll']
+            loss function to use if not `dict_in_out`. Can be either a string from
+            [`xent`, 'mse', 'nll', 'l1'] or a python `callable` such that
+            `lossfn(output, target)` returns the loss value. Examples of valid
+            `callable`s are `F.cross_entropy`, `F.mse_loss`, etc, where `F` is
+            `torch.nn.functional`. Default: 'xent'
         filter_module_by_name:
             a function that returns a bool given module names (from
             `model.named_modules()`), or None. If not None, then only modules
@@ -257,12 +260,23 @@ def _get_coord_data(models, dataloader, optcls, nsteps=3,
             function dicts to be used in `_record_coords`. By default, only `l1`
             is computed for output activations of each module.
         show_progress:
-            show progress using tqdm.
+            show progress using tqdm. Default: True
+        one_hot_target:
+            convert target label into a one-hot vector. This typically is only
+            used for `'mse'` or `'l1'` losses in classification tasks.
+            Default: False
     Output:
         a pandas DataFrame containing recorded results. The column names are
         `'width', 'module', 't'` as well as names of statistics recorded, such
         as `'l1'` (see `FDICT` for other premade statistics that can be
         collected).
+        
+    Breaking Changes:
+        In v1.0.0, when `lossfn=='mse'`, the target is automatically converted
+        to a one hot vector before loss computation. Starting in v1.1.0, this
+        behavior is turned off, and the user needs to explicitly turn on this
+        behavior by setting `one_hot_target=True`.
+    
     '''
     df = []
     if fix_data:
@@ -307,14 +321,21 @@ def _get_coord_data(models, dataloader, optcls, nsteps=3,
                     output = model(data)
                     if flatten_output:
                         output = output.view(-1, output.shape[-1])
+                    if one_hot_target:
+                        target = F.one_hot(target,
+                                  num_classes=output.size(-1)).float()
                     if lossfn == 'xent':
                         loss = F.cross_entropy(output, target)
                     elif lossfn == 'mse':
-                        loss = F.mse_loss(output, F.one_hot(target, num_classes=output.size(-1)).float())
+                        loss = F.mse_loss(output, target)
                     elif lossfn == 'nll':
                         loss = F.nll_loss(output, target)
+                    elif lossfn == 'l1':
+                        loss = F.l1_loss(output, target)
+                    elif callable(lossfn):
+                        loss = lossfn(output, target)
                     else:
-                        raise NotImplementedError()
+                        raise NotImplementedError(f'unknown `lossfn`: {lossfn}')
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
@@ -381,8 +402,11 @@ def get_coord_data(models, dataloader, optimizer='sgd', lr=None, mup=True,
             is a dict. If the output is not a dict, then we assume the first
             element of the output is the loss.
         lossfn:
-            loss function to use if not `dict_in_out`. Default is `xent` for
-            cross entropy loss. Other choices are ['mse', 'nll']
+            loss function to use if not `dict_in_out`. Can be either a string from
+            [`xent`, 'mse', 'nll', 'l1'] or a python `callable` such that
+            `lossfn(output, target)` returns the loss value. Examples of valid
+            `callable`s are `F.cross_entropy`, `F.mse_loss`, etc, where `F` is
+            `torch.nn.functional`. Default: 'xent'
         filter_module_by_name:
             a function that returns a bool given module names (from
             `model.named_modules()`), or None. If not None, then only modules
@@ -395,12 +419,22 @@ def get_coord_data(models, dataloader, optimizer='sgd', lr=None, mup=True,
             function dicts to be used in `_record_coords`. By default, only `l1`
             is computed for output activations of each module.
         show_progress:
-            show progress using tqdm.
+            show progress using tqdm. Default: True
+        one_hot_target:
+            convert target label into a one-hot vector. This typically is only
+            used for `'mse'` or `'l1'` losses in classification tasks.
+            Default: False
     Output:
         a pandas DataFrame containing recorded results. The column names are
         `'width', 'module', 't'` as well as names of statistics recorded, such
         as `'l1'` (see `FDICT` for other premade statistics that can be
         collected).
+        
+    Breaking Changes:
+        In v1.0.0, when `lossfn=='mse'`, the target is automatically converted
+        to a one hot vector before loss computation. Starting in v1.1.0, this
+        behavior is turned off, and the user needs to explicitly turn on this
+        behavior by setting `one_hot_target=True`.
     '''
     if lr is None:
         lr = 0.1 if optimizer == 'sgd' else 1e-3
@@ -434,7 +468,8 @@ def get_coord_data(models, dataloader, optimizer='sgd', lr=None, mup=True,
 
 def plot_coord_data(df, y='l1', save_to=None, suptitle=None, x='width', hue='module',
                     legend='full', name_contains=None, name_not_contains=None,
-                    loglog=True, logbase=2, face_color=None):
+                    loglog=True, logbase=2, face_color=None, subplot_width=5,
+                    subplot_height=4):
     '''Plot coord check data `df` obtained from `get_coord_data`.
 
     Input:
@@ -455,13 +490,19 @@ def plot_coord_data(df, y='l1', save_to=None, suptitle=None, x='width', hue='mod
         name_contains:
             only plot modules whose name contains `name_contains`
         name_not_contains:
-            only plot modules whose name does not `name_not_contains`
+            only plot modules whose name does not contain `name_not_contains`
         loglog:
             whether to use loglog scale. Default: True
         logbase:
             the log base, if using loglog scale. Default: 2
         face_color:
             background color of the plot. Default: None (which means white)
+        subplot_width, subplot_height:
+            The width and height for each timestep's subplot. More precisely,
+            the figure size will be 
+                `(subplot_width*number_of_time_steps, subplot_height)`.
+            Default: 5, 4
+            
     Output:
         the `matplotlib` figure object
     '''
@@ -488,7 +529,7 @@ def plot_coord_data(df, y='l1', save_to=None, suptitle=None, x='width', hue='mod
     def tight_layout(plt):
         plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     ### plot
-    fig = plt.figure(figsize=(5*len(ts), 4))
+    fig = plt.figure(figsize=(subplot_width*len(ts), subplot_height))
     if face_color is not None:
         fig.patch.set_facecolor(face_color)
     for t in ts:
