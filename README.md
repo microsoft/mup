@@ -127,7 +127,7 @@ optimizer = MuSGD(model.parameters(), lr=0.1)
 
 Note the base and delta models *do not need to be trained* --- we are only extracting parameter shape information from them.
 Therefore, optionally, we can avoid instantiating these potentially large models by using the `deferred_init` function in `torchdistx`.
-After installing [`torchdistx`](https://github.com/pytorch/torchdistx), use `torchdistx.deferred_init.deferred_init(MyModel, **args)` instead of `MyModel(**args)`. See [this page](https://pytorch.org/torchdistx/latest/deferred_init.html) for more detail.
+After installing [`torchdistx`](https://github.com/pytorch/torchdistx), use `torchdistx.deferred_init.deferred_init(MyModel, **args)` instead of `MyModel(**args)`. See [this page](https://pytorch.org/torchdistx/latest/deferred_init.html) for more detail. (As of 6/17/2022, this requires the `nightly` build of PyTorch to work for some network architectures.)
 
 ## How `mup` Works Under the Hood
 
