@@ -128,7 +128,8 @@ optimizer = MuSGD(model.parameters(), lr=0.1)
 Note the base and delta models *do not need to be trained* --- we are only extracting parameter shape information from them.
 Therefore, optionally, we can avoid instantiating these potentially large models by passing `device='meta'` to their constructor.
 However, you need to make sure that the `device` flag is appropriately passed down to the constructor of all submodules.
-Of course, it'd be even better if PyTorch can do this automatically for any existing `nn.Module`. If you want to see this happen, please upvote [this PyTorch issue](https://github.com/pytorch/pytorch/issues/74143).
+Of course, it'd be even better if PyTorch can do this automatically for any existing `nn.Module`.
+This functionality is currently provided through `torchdistx.deferred_init`; however, it requires the `nightly` build of `torch` to function correctly for some architectures. If you'd like to take advantage of this feature, see the `torchdistx` branch in this repo.
 
 ## How `mup` Works Under the Hood
 
