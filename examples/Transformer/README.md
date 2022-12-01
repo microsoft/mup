@@ -29,9 +29,9 @@ and growing sizes under SP, e.g.,
 Having verified our implementation of μP, we can scale up our model and train using the same hyperparameters used for the small model and expect that the wider model performs better on the training data and that the optimal hyperparameters transfer.
 ```bash
 # for SGD
-python main.py --d_model 4096 --load_base_shapes width256.bsh --optimizer sgd --lr 0.5 --cuda
+python main.py --d_model 4096 --load_base_shapes width256.bsh --optimizer musgd --lr 0.5 --cuda
 # for Adam
-python main.py --d_model 4096 --load_base_shapes width256.bsh --optimizer adam --lr 0.01 --cuda
+python main.py --d_model 4096 --load_base_shapes width256.bsh --optimizer muadam --lr 0.01 --cuda
 ```
 
 Note that if you do not specify `--load_base_shapes`, the script will default to training a SP model.
