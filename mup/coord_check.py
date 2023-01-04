@@ -536,7 +536,7 @@ def plot_coord_data(df, y='l1', save_to=None, suptitle=None, x='width', hue='mod
         fig.patch.set_facecolor(face_color)
     for t in ts:
         t = int(t)
-        plt.subplot(1, len(ts), t)
+        plt.subplot(1, len(ts), t + 1)
         sns.lineplot(x=x, y=y, data=df[df.t==t], hue=hue, legend=legend if t==1 else None)
         plt.title(f't={t}')
         if t != 1:
