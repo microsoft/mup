@@ -142,6 +142,8 @@ def _record_coords(records, width, modulename, t,
                 for fname, f in fdict.items():
                     _d[fname] = f(x).item()
                 records.append(_d)
+            elif x is None:
+                pass
             else:
                 raise NotImplementedError(f'Unexpected output type: {type(x)}')
         with torch.no_grad():
