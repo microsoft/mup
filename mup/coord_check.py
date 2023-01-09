@@ -142,8 +142,10 @@ def _record_coords(records, width, modulename, t,
                 for fname, f in fdict.items():
                     _d[fname] = f(x).item()
                 records.append(_d)
+            elif x is None:
+                pass
             else:
-                raise NotImplemented(f'Unexpected output type: {type(x)}')
+                raise NotImplementedError(f'Unexpected output type: {type(x)}')
         with torch.no_grad():
             ret = {
                 'width': width,
@@ -168,7 +170,7 @@ def _record_coords(records, width, modulename, t,
                     _ret[fname] = f(output).item()
                 records.append(_ret)
             else:
-                raise NotImplemented(f'Unexpected output type: {type(output)}')
+                raise NotImplementedError(f'Unexpected output type: {type(output)}')
 
             # input stats
             if input_fdict:
@@ -188,7 +190,7 @@ def _record_coords(records, width, modulename, t,
                         _ret[fname] = f(input).item()
                     records.append(_ret)
                 else:
-                    raise NotImplemented(f'Unexpected output type: {type(input)}')
+                    raise NotImplementedError(f'Unexpected output type: {type(input)}')
 
             # param stats
             if param_fdict:
