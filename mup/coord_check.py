@@ -41,14 +41,14 @@ def covoffdiag(x):
 
 #: dict of provided functions for use in coord check
 FDICT = {
-    'l1': lambda x: torch.abs(x).mean(),
-    'l2': lambda x: (x**2).mean()**0.5,
-    'mean': lambda x: x.mean(),
-    'std': lambda x: x.std(),
-    'covl1': lambda x: torch.abs(cov(x)).mean(),
-    'covl2': lambda x: (cov(x)**2).mean()**0.5,
-    'covoffdiagl1': lambda x: torch.abs(covoffdiag(x)).mean(),
-    'covoffdiagl2': lambda x: (covoffdiag(x)**2).mean()**0.5
+    'l1': lambda x: torch.abs(x).mean(dtype=torch.float32),
+    'l2': lambda x: (x**2).mean(dtype=torch.float32)**0.5,
+    'mean': lambda x: x.mean(dtype=torch.float32),
+    'std': lambda x: x.std(dtype=torch.float32),
+    'covl1': lambda x: torch.abs(cov(x)).mean(dtype=torch.float32),
+    'covl2': lambda x: (cov(x)**2).mean(dtype=torch.float32)**0.5,
+    'covoffdiagl1': lambda x: torch.abs(covoffdiag(x)).mean(dtype=torch.float32),
+    'covoffdiagl2': lambda x: (covoffdiag(x)**2).mean(dtype=torch.float32)**0.5
 }
 
 def convert_fdict(d):
