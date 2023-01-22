@@ -76,14 +76,14 @@ class MyModel(nn.Module):
 
 ### Instantiate a base model
 base_model = MyModel(width=1)
-### Optionally, use `device='meta'` to avoid instantiating the parameters
-### This requires you to pass the device flag down to all sub-modules
-# base_model = MyModel(width=1, device='meta')
+### Optionally, use `torchdistx.deferred_init.deferred_init` to avoid instantiating the parameters
+### Simply install `torchdistx` and use
+# base_model = torchdistx.deferred_init.deferred_init(MyModel, width=1)
 ### Instantiate a "delta" model that differs from the base model
 ###   in all dimensions ("widths") that one wishes to scale.
 ### Here it's simple, but e.g., in a Transformer, you may want to scale
 ###   both nhead and dhead, so the delta model should differ in both.
-delta_model = MyModel(width=2) # Optionally add the `device='meta'` to avoid instantiating
+delta_model = MyModel(width=2) # Optionally use `torchdistx` to avoid instantiating
 
 ### Instantiate the target model (the model you actually want to train).
 ### This should be the same as the base model except 
@@ -126,10 +126,10 @@ optimizer = MuSGD(model.parameters(), lr=0.1)
 ```
 
 Note the base and delta models *do not need to be trained* --- we are only extracting parameter shape information from them.
-Therefore, optionally, we can avoid instantiating these potentially large models by passing `device='meta'` to their constructor.
-However, you need to make sure that the `device` flag is appropriately passed down to the constructor of all submodules.
-Of course, it'd be even better if PyTorch can do this automatically for any existing `nn.Module`.
-This functionality is currently provided through `torchdistx.deferred_init`; however, it requires the `nightly` build of `torch` to function correctly for some architectures. If you'd like to take advantage of this feature, see the `torchdistx` branch in this repo.
+Therefore, optionally, we can avoid instantiating these potentially large models by using the `deferred_init` function in `torchdistx`.
+After installing [`torchdistx`](https://github.com/pytorch/torchdistx), use `torchdistx.deferred_init.deferred_init(MyModel, **args)` instead of `MyModel(**args)`. See [this page](https://pytorch.org/torchdistx/latest/deferred_init.html) for more detail.
+In the MLP and Transformer examples (not `mutransformers`) we provided, you can activate this feature by passing `--deferred_init`.
+
 
 ## How `mup` Works Under the Hood
 
