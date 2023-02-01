@@ -6,7 +6,11 @@ import torch.nn.functional as F
 from mup import MuReadout, MuSharedReadout
 
 '''
-The only things we modified from the original pytorch Transformer example are 1) replace the readout layer with MuReadout or MuSharedReadout, 2) use fan_in style initialization, and 3) change attention scaling to 1/d instead of 1/sqrt(d)
+The only things we modified from the original pytorch Transformer example are 
+1) replace the readout layer with MuReadout or MuSharedReadout, 
+2) use fan_in style initialization, 
+3) change attention scaling to 1/d instead of 1/sqrt(d), and
+4) zero initialization of query weights
 '''
 
 def init_method_normal(sigma):
@@ -156,10 +160,13 @@ class TransformerEncoderLayer(Module):
         >>> out = encoder_layer(src)
     """
 
-    def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1, activation="relu", encoder_var=1, attn_mult=1, bias=True, nlayers=1, standparam=False):
+    def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1, activation="relu",
+                    encoder_var=1, attn_mult=1, bias=True, nlayers=1, standparam=False):
         super(TransformerEncoderLayer, self).__init__()
         self.attn_mult = attn_mult
-        self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout, attn_mult=attn_mult, bias=bias, add_bias_kv=bias, encoder_var=encoder_var, standparam=standparam)
+        self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout,attn_mult=attn_mult,
+                                            bias=bias, add_bias_kv=bias, encoder_var=encoder_var,
+                                            standparam=standparam)
         # Implementation of Feedforward model
         self.linear1 = nn.Linear(d_model, dim_feedforward, bias=bias)
         self.dropout = Dropout(dropout)
@@ -241,7 +248,8 @@ class MultiheadAttention(Module):
     }
     __constants__ = ['q_proj_weight', 'k_proj_weight', 'v_proj_weight', 'in_proj_weight']
 
-    def __init__(self, embed_dim, num_heads, dropout=0., bias=True, add_bias_kv=False, add_zero_attn=False, kdim=None, vdim=None, attn_mult=1, encoder_var=1, standparam=False):
+    def __init__(self, embed_dim, num_heads, dropout=0., bias=True, add_bias_kv=False,
+                 add_zero_attn=False, kdim=None, vdim=None, attn_mult=1, encoder_var=1, standparam=False):
         super(MultiheadAttention, self).__init__()
         self.embed_dim = embed_dim
         self.attn_mult = attn_mult
@@ -287,8 +295,11 @@ class MultiheadAttention(Module):
     def _reset_parameters(self):
         if self._qkv_same_embed_dim:
             self.init_method(self.in_proj_weight)
+            # zero initializing query head
+            constant_(self.in_proj_weight[:self.embed_dim], 0.)
         else:
-            self.init_method(self.q_proj_weight)
+            # zero initializing query head
+            constant_(self.q_proj_weight, 0.)
             self.init_method(self.k_proj_weight)
             self.init_method(self.v_proj_weight)
 
