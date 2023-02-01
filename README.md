@@ -46,7 +46,7 @@ pip install mup
 
 Clone this repo, change to its directory, and do
 ```
-pip install -r requirement.txt
+pip install -r requirements.txt
 pip install -e .
 ```
 
