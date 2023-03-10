@@ -491,9 +491,11 @@ def plot_coord_data(df, y='l1', save_to=None, suptitle=None, x='width', hue='mod
         legend:
             'auto', 'brief', 'full', or False. This is passed to `seaborn.lineplot`.
         name_contains:
-            only plot modules whose name contains `name_contains`
+            only plot modules whose name contains `name_contains`, intersection with `name_not_contains`
         name_not_contains:
-            only plot modules whose name does not contain `name_not_contains`
+            only plot modules whose name does not contain `name_not_contains`, intersection with `name_contains`
+        module_list:
+            only plot modules that are given in the list, overrides `name_contains` and `name_not_contains`
         loglog:
             whether to use loglog scale. Default: True
         logbase:
@@ -513,18 +515,17 @@ def plot_coord_data(df, y='l1', save_to=None, suptitle=None, x='width', hue='mod
     df = copy(df)
     # nn.Sequential has name '', which duplicates the output layer
     df = df[df.module != '']
+    if module_list is not None:
+        df = df[df['module'].isin(module_list)]
+    else:
+        if name_contains is not None:
+            df = df[df['module'].str.contains(name_contains)]
+        if name_not_contains is not None:
+            df = df[~(df['module'].str.contains(name_not_contains))]
+    # for nn.Sequential, module names are numerical
     try:
-        if module_list is not None:
-            df = df[df['module'].isin(module_list)]
-        else:
-            if name_contains is not None:
-                df = df[df['module'].str.contains(name_contains)]
-            if name_not_contains is not None:
-                df = df[~(df['module'].str.contains(name_not_contains))]
-            # for nn.Sequential, module names are numerical
-            # df['module'] = pd.to_numeric(df['module'])
-    except Exception as e:
-        print(f"Filtering not applied: {e}")
+        df['module'] = pd.to_numeric(df['module'])
+    except ValueError:
         pass
 
     ts = df.t.unique()
