@@ -549,8 +549,6 @@ def plot_coord_data(df, y='l1', save_to=None, suptitle=None, x='width', hue='mod
         plt.title(f't={t}')
         if t != 1:
             plt.ylabel('')
-        else:
-            plt.legend(labels=hue_order, bbox_to_anchor=(0, 1), loc="upper right")
         if loglog:
             plt.loglog(base=logbase)
         ax = plt.gca()
