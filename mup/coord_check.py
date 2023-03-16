@@ -490,10 +490,8 @@ def plot_coord_data(df, y='l1', save_to=None, suptitle=None, x='width', hue='mod
             the column of `df` to represent as color. Default: `'module'`
         legend:
             'auto', 'brief', 'full', or False. This is passed to `seaborn.lineplot`.
-        name_contains:
-            only plot modules whose name contains `name_contains`, intersection with `name_not_contains`
-        name_not_contains:
-            only plot modules whose name does not contain `name_not_contains`, intersection with `name_contains`
+        name_contains, name_not_contains:
+            only plot modules whose name contains `name_contains` and does not contain `name_not_contains`
         module_list:
             only plot modules that are given in the list, overrides `name_contains` and `name_not_contains`
         loglog:
