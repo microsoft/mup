@@ -3,6 +3,8 @@
 [Paper link](https://arxiv.org/abs/2203.03466)
 |
 [Blog link](https://www.microsoft.com/en-us/research/blog/%C2%B5transfer-a-technique-for-hyperparameter-tuning-of-enormous-neural-networks/)
+|
+[YouTube link](https://www.youtube.com/watch?v=z8-C42mAwBc)
 
 In [*Tensor Programs V: Tuning Large Neural Networks via Zero-Shot Hyperparameter Transfer*](https://arxiv.org/abs/2203.03466), we show that optimal hyperparameters become stable across neural network sizes when we parametrize the model in [maximal update parametrization (μP)](http://arxiv.org/abs/2011.14522).
 This can be used to tune extremely large neural networks such as large pretrained transformers, as we have done in our work.
