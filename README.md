@@ -145,6 +145,7 @@ For example, the Adam learning rate of hidden weights `p` is calculated as  `glo
 
 - `set_base_shapes(model, ...)` assumes that `model` has just been randomly initialized in the standard way and rescales its parameters using the base shape information so the model is in μP.
 - If you want data parallelism, please use `torch.nn.parallel.DistributedDataParallel` instead of `torch.nn.DataParallel`. This is because the latter removes the attributes the `mup` package adds to each parameter tensor of the model. Also, for performance, `pytorch` [recommends the former anyway](https://pytorch.org/docs/stable/notes/cuda.html#cuda-nn-ddp-instead).
+- For `FullyShardedDataParallel` (FSDP) usage, you have to use a PyTorch version ≥2 and wrap your model like `FSDP(..., use_orig_params=True)`.
 - We scale the learning rate according to μP explicitly by creating refined parameter groups from what is passed to the `mup` optimizer and by manipulating the `lr` attribute in those groups. This is compatible with PyTorch's learning rate schedulers. However, if you roll your own, make sure the scheduler sets the learning rate relative to what is currently in the refined parameter groups. The following is an example of what *not* to do and what is OK:
 ```python
 optimizer = mup.MuAdam(model.parameters(), lr=1e-3)

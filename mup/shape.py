@@ -156,6 +156,13 @@ def apply_infshapes(model, infshapes):
     for name, p in model.named_parameters():
         p.infshape = infshapes[name]
 
+
+def _fix_fsdp_readout(module):
+    assert isinstance(module, MuReadout)
+    assert hasattr(module.weight, 'infshape')
+    module.weight_infshape = module.weight.infshape
+
+
 def set_base_shapes(model, base, rescale_params=True, delta=None, savefile=None, do_assert=True):
     '''Sets the `p.infshape` attribute for each parameter `p` of `model`.
 
@@ -192,6 +199,9 @@ def set_base_shapes(model, base, rescale_params=True, delta=None, savefile=None,
                 module._rescale_parameters()
             elif isinstance(module, (Linear, _ConvNd)):
                 rescale_linear_bias(module)
+    for name, module in model.named_modules():
+        if isinstance(module, MuReadout):
+            _fix_fsdp_readout(module)
     return model
 
 def assert_hidden_size_inf(model):
