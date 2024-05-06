@@ -23,6 +23,8 @@ from collections import defaultdict
 
 from torch.optim import SGD, Adam, AdamW
 
+import logging
+logger = logging.getLogger(__name__)
 
 def process_param_groups(params, **kwargs):
     param_groups = list(params)
@@ -51,6 +53,9 @@ def MuAdam(params, impl=Adam, decoupled_wd=False, **kwargs):
         An instance of `impl` with refined parameter groups, each of which has the correctly
         scaled learning rate according to mup.
     '''
+    if impl == Adam and kwargs.get('weight_decay', False):
+        logger.warning('MuAdam does not scale weight decay correctly. Use MuAdamW instead.')
+
     new_param_groups = []
     for param_group in process_param_groups(params, **kwargs):
         # For every existing param group, we split into several new groups
