@@ -2,6 +2,7 @@
 '''
 Helper functions for performing coord check.
 '''
+import dataclasses
 import os
 from copy import copy
 from itertools import product
@@ -137,6 +138,11 @@ def _record_coords(records, width, modulename, t,
                     _d = copy(d)
                     _d['module'] += f'[{name}]'
                     get_stat(_d, _x, fdict)
+            elif dataclasses.is_dataclass(x):
+                for field in dataclasses.fields(x):
+                    _d = copy(d)
+                    _d['module'] += f'.{field.name}'
+                    get_stat(_d, getattr(x, field.name), fdict)
             elif isinstance(x, torch.Tensor):
                 _d = copy(d)
                 for fname, f in fdict.items():
@@ -146,60 +152,21 @@ def _record_coords(records, width, modulename, t,
                 pass
             else:
                 raise NotImplementedError(f'Unexpected output type: {type(x)}')
-        with torch.no_grad():
-            ret = {
-                'width': width,
-                'module': modulename,
-                't': t
-            }
 
+        with torch.no_grad():
             # output stats
-            if isinstance(output, (tuple, list)):
-                for i, out in enumerate(output):
-                    _ret = copy(ret)
-                    _ret['module'] += f':out[{i}]'
-                    get_stat(_ret, out, output_fdict)
-            elif isinstance(output, dict):
-                for name, out in output.items():
-                    _ret = copy(ret)
-                    _ret['module'] += f':out[{name}]'
-                    get_stat(_ret, out, output_fdict)
-            elif isinstance(output, torch.Tensor):
-                _ret = copy(ret)
-                for fname, f in output_fdict.items():
-                    _ret[fname] = f(output).item()
-                records.append(_ret)
-            else:
-                raise NotImplementedError(f'Unexpected output type: {type(output)}')
+            d = {'width': width, 'module': modulename + ':out', 't': t}
+            get_stat(d, output, output_fdict)
 
             # input stats
             if input_fdict:
-                if isinstance(input, (tuple, list)):
-                    for i, out in enumerate(input):
-                        _ret = copy(ret)
-                        _ret['module'] += f':in[{i}]'
-                        get_stat(_ret, out, input_fdict)
-                elif isinstance(input, dict):
-                    for name, out in input.items():
-                        _ret = copy(ret)
-                        _ret['module'] += f':in[{name}]'
-                        get_stat(_ret, out, input_fdict)
-                elif isinstance(input, torch.Tensor):
-                    _ret = copy(ret)
-                    for fname, f in input_fdict.items():
-                        _ret[fname] = f(input).item()
-                    records.append(_ret)
-                else:
-                    raise NotImplementedError(f'Unexpected output type: {type(input)}')
+                d = {'width': width, 'module': modulename + ':in', 't': t}
+                get_stat(d, input, input_fdict)
 
             # param stats
             if param_fdict:
-                for name, p in module.named_parameters():
-                    _ret = copy(ret)
-                    _ret['module'] += f':param[{name}]'
-                    for fname, f in param_fdict.items():
-                        _ret[fname] = f(p).item()
-                    records.append(_ret)
+                d = {'width': width, 'module': modulename + ':param', 't': t}
+                get_stat(d, dict(module.named_parameters()), param_fdict)
 
     return f
 
