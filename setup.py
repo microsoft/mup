@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="mup",
-    version="1.0.0",
+    version="1.0.1",
     author="Edward J Hu, Greg Yang",
     author_email="edwardjhu@edwardjhu.com, gregyang@microsoft.com",
     description="Maximal Update Parametrization",
