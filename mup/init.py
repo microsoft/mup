@@ -78,7 +78,7 @@ def eye_(tensor):
 
 def _inf_fan_adjust_xavier(scale, tensor):
     fan_out, fan_in = tensor.infshape[:2]
-    # following are needed to accomodate SP models where all infshapes are finite so base_dims are Nones
+    # following are needed to accommodate SP models where all infshapes are finite so base_dims are Nones
     fan_out_base_dim = fan_out.base_dim or fan_out.dim
     fan_in_base_dim = fan_in.base_dim or fan_in.dim
     scale *= math.sqrt(
